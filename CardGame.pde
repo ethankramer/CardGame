@@ -14,15 +14,21 @@ void setup() {
   frameRate(100);
 
   heart = loadImage("heart.png");
+  diamond = loadImage("diamond.png");
+  spade = loadImage("spade.png");
   club = loadImage("club.png");
 }
 
 void draw() {
   background(150, 200, 50);
   Card card = new Card(0, 0, 100, 100, 1);
-  Card card1 = new Card(3, 0, 203, 100, 1);
+  Card card1 = new Card(1, 0, 203, 100, 1);
+  Card card2 = new Card(2, 0, 306, 100, 1);
+  Card card3 = new Card(3, 0, 409, 100, 1);
   card.drawCard();  
   card1.drawCard();
+  card2.drawCard();
+  card3.drawCard();
 }
 
 public class Card {
@@ -81,16 +87,22 @@ public class Card {
     if (this.suit==0) {
       //heart
       imageMode(CORNER);
-      image(heart, this.xCoord, this.yCoord-3);
+      image(heart, this.xCoord, this.yCoord-6);
       heart.resize(0, 60);
     } else if (this.suit==1) {
       //diamond
+      imageMode(CORNER);
+      image(diamond, this.xCoord, this.yCoord-6);
+      diamond.resize(0, 60);
     } else if (this.suit==2) {
       //spade
+      imageMode(CORNER);
+      image(spade, this.xCoord, this.yCoord-6);
+      spade.resize(0, 60);
     } else {
       //club
       imageMode(CORNER);
-      image(club, this.xCoord, this.yCoord-3);
+      image(club, this.xCoord, this.yCoord-6);
       club.resize(0, 60);
     }
   }
