@@ -1,8 +1,10 @@
 import java.util.*;
 import java.lang.Math;
 
-static float cardWidth = 100;
-static float cardHeight = 1.5*cardWidth;
+static final float globalScale = 1; //Works best for scale factor between 0.7 and 1.25
+
+static final float cardWidth = globalScale * 100;
+static final float cardHeight = 1.5*cardWidth;
 
 PImage heart;
 PImage diamond;
@@ -10,7 +12,7 @@ PImage spade;
 PImage club;
 
 void setup() {
-  size(1750, 750);
+  size(1920, 950);
   frameRate(100);
 
   heart = loadImage("heart.png");
@@ -21,26 +23,16 @@ void setup() {
 
 void draw() {
   background(150, 200, 50);
-  /*
-  Card card = new Card(0, 1, 100, 100, 1);
-  Card card1 = new Card(1, 0, 203, 100, 1);
-  Card card2 = new Card(2, 13, 306, 100, 1);
-  Card card3 = new Card(3, 7, 409, 100, 1);
-  card.drawCard();  
-  card1.drawCard();
-  card2.drawCard();
-  card3.drawCard();
-  */
-  int initialX = 50;
-  int initialY = 50;
-  for(int i=0; i<4; i++){
-     for(int j=0; j<14; j++){
-         Card c = new Card(i,j,initialX,initialY,1);
-         c.drawCard();
-         initialX += cardWidth+3;
-     }
-     initialY += cardHeight+3;
-     initialX = 50;
+  int initialX = 30;
+  int initialY = 25;
+  for (int i=0; i<4; i++) {
+    for (int j=0; j<14; j++) {
+      Card c = new Card(i, j, initialX, initialY);
+      c.drawCard();
+      initialX += (globalScale*cardWidth)+3;
+    }
+    initialY += (globalScale*cardHeight)+3;
+    initialX = 30;
   }
 }
 
@@ -52,12 +44,12 @@ public class Card {
   private float scale; //variable to change the size of the card
   private String stringValue; //String representation of the value
 
-  public Card(int st, int val, int x, int y, float scl) {
+  public Card(int st, int val, int x, int y) {
     suit=st%4;
     value=val%14;
     xCoord = x;
     yCoord = y;
-    scale = scl;
+    scale = globalScale;
     if (value==0) {
       stringValue = "A";
     } else if (value==11) {
@@ -113,55 +105,77 @@ public class Card {
       //heart
       imageMode(CORNER);
       image(heart, this.xCoord, this.yCoord-6);
-      heart.resize(0, 60);
+      if (this.scale<1) {
+        heart.resize(0, 35);
+      } else {
+        heart.resize(0, 60);
+      }
 
       textSize(32);
       fill(255, 0, 0);
       if (this.value==10) {
-        text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+      } else if (this.value==11) {
+        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
       } else {
-        text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
       }
     } else if (this.suit==1) {
       //diamond
       imageMode(CORNER);
       image(diamond, this.xCoord, this.yCoord-6);
-      diamond.resize(0, 60);
+      if (this.scale<1) {
+        diamond.resize(0, 35);
+      } else {
+        diamond.resize(0, 60);
+      }
 
       textSize(32);
       fill(255, 0, 0);
       if (this.value==10) {
-        text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+      } else if (this.value==11) {
+        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
       } else {
-        text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
       }
     } else if (this.suit==2) {
       //spade
       imageMode(CORNER);
       image(spade, this.xCoord, this.yCoord-6);
-      spade.resize(0, 60);
+      if (this.scale<1) {
+        spade.resize(0, 35);
+      } else {
+        spade.resize(0, 60);
+      }
 
       textSize(32);
       fill(0);
-      if(this.value==10){
-        text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));  
-      }
-      else{
-        text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2)); 
+      if (this.value==10) {
+        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+      } else if (this.value==11) {
+        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+      } else {
+        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
       }
     } else {
       //club
       imageMode(CORNER);
       image(club, this.xCoord, this.yCoord-6);
-      club.resize(0, 60);
+      if (this.scale<1) {
+        club.resize(0, 35);
+      } else {
+        club.resize(0, 60);
+      }
 
       textSize(32);
       fill(0);
-      if(this.value==10){
-        text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-      }
-      else{
-        text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+      if (this.value==10) {
+        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+      } else if (this.value==11) {
+        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+      } else {
+        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
       }
     }
   }
