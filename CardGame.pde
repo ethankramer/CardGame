@@ -12,6 +12,7 @@ PImage heart;
 PImage diamond;
 PImage spade;
 PImage club;
+PImage cardBack;
 
 Deck deck = new Deck();
 BlackJack game = new BlackJack();
@@ -24,6 +25,7 @@ void setup() {
   diamond = loadImage("diamond.png");
   spade = loadImage("spade.png");
   club = loadImage("club.png");
+  cardBack = loadImage("cardBack.png");
 
 
   //deck.shuffleDeck();
@@ -36,6 +38,7 @@ void draw() {
   //System.out.println(deck.getHead().getNext().hasNext());
   //deck.drawCard();
   //deck.displayDeck();
+
   game.displayPlayerHand();
   game.displayDealerHand();
   game.getDeck().displayDeck();
@@ -102,27 +105,6 @@ public class Deck {
     return this.head;
   }
 
-  public void checkNext() {
-    Node curr = this.head;
-    int count = 1;
-    int x = 30;
-    int y = 30;
-    while (curr.hasNext()) {
-      System.out.println("True #"+count); 
-      Card c = curr.getNext().getData();
-      c.setX(x);
-      c.setY(y);
-      c.drawCard();
-      x+=103;
-      count++;
-      if (x>1300) {
-        y += 150;
-        x = 30;
-      }
-      curr=curr.getNext();
-    }
-  }
-
   public void shuffleDeck() {
     Card[] tempList = new Card[len];
     int tempIndex = 0;
@@ -156,9 +138,9 @@ public class Deck {
       this.head.changeNext(this.head.getNext().getNext());
       len--;
       return c;
-    }
-    else{
-       return null; 
+    } else {
+      System.out.println("Deck is empty");
+      return null;
     }
   }
 
@@ -267,10 +249,15 @@ public class BlackJack {
     dealerHand = new BlackJackHand();
 
     for (int i=0; i<4; i++) {
+      Card c = deck.drawCard();
       if (i%2==0) {
-        playerHand.addCard(deck.drawCard());
+        c.setFaceDown(false);
+        playerHand.addCard(c);
       } else {
-        dealerHand.addCard(deck.drawCard());
+        if (i==1) {
+          c.setFaceDown(false);
+        }
+        dealerHand.addCard(c);
       }
     }
   }
@@ -296,6 +283,7 @@ public class Card {
   private float yCoord; //y Coordinate (top left corner)
   private float scale; //variable to change the size of the card
   private String stringValue; //String representation of the value
+  private boolean faceDown;
 
   public Card(int st, int val, float x, float y) {
     suit=st%4;
@@ -303,6 +291,7 @@ public class Card {
     xCoord = x;
     yCoord = y;
     scale = globalScale;
+    faceDown = true;
     if (value==1) {
       stringValue = "A";
     } else if (value==11) {
@@ -333,6 +322,10 @@ public class Card {
     return scale;
   }
 
+  public boolean getFaceDown() {
+    return faceDown;
+  }
+
   //Set methods
   public void setSuit(int st) {
     suit = st;
@@ -349,86 +342,94 @@ public class Card {
   public void setScale(float scl) {
     scale = scl;
   }
+  public void setFaceDown(boolean b) {
+    faceDown=b;
+  }
 
   public void drawCard() {
     fill(230);
     stroke(0);
     rect(xCoord, yCoord, cardWidth*scale, cardHeight*scale, 6);
-    if (this.suit==0) {
-      //heart
-      imageMode(CORNER);
-      if (this.scale<1) {
-        heart.resize(0, 35);
-      } else {
-        heart.resize(0, 60);
-      }
-      image(heart, this.xCoord, this.yCoord-6);
-
-      textSize(32);
-      fill(255, 0, 0);
-      if (this.value==10) {
-        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      } else if (this.value==11) {
-        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      } else {
-        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      }
-    } else if (this.suit==1) {
-      //diamond
-      imageMode(CORNER);
-      if (this.scale<1) {
-        diamond.resize(0, 35);
-      } else {
-        diamond.resize(0, 60);
-      }
-      image(diamond, this.xCoord, this.yCoord-6);
-
-      textSize(32);
-      fill(255, 0, 0);
-      if (this.value==10) {
-        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      } else if (this.value==11) {
-        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      } else {
-        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      }
-    } else if (this.suit==2) {
-      //spade
-      imageMode(CORNER);
-      if (this.scale<1) {
-        spade.resize(0, 35);
-      } else {
-        spade.resize(0, 60);
-      }
-      image(spade, this.xCoord, this.yCoord-6);
-
-      textSize(32);
-      fill(0);
-      if (this.value==10) {
-        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      } else if (this.value==11) {
-        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      } else {
-        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      }
+    if (faceDown) {
+      imageMode(CENTER);
+      image(cardBack, this.xCoord+(cardWidth/2), this.yCoord+(cardHeight/2));
     } else {
-      //club
-      imageMode(CORNER);
-      if (this.scale<1) {
-        club.resize(0, 35);
-      } else {
-        club.resize(0, 60);
-      }
-      image(club, this.xCoord, this.yCoord-6);
+      if (this.suit==0) {
+        //heart
+        imageMode(CORNER);
+        if (this.scale<1) {
+          heart.resize(0, 35);
+        } else {
+          heart.resize(0, 60);
+        }
+        image(heart, this.xCoord, this.yCoord-6);
 
-      textSize(32);
-      fill(0);
-      if (this.value==10) {
-        text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
-      } else if (this.value==11) {
-        text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        textSize(32);
+        fill(255, 0, 0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else {
+          text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        }
+      } else if (this.suit==1) {
+        //diamond
+        imageMode(CORNER);
+        if (this.scale<1) {
+          diamond.resize(0, 35);
+        } else {
+          diamond.resize(0, 60);
+        }
+        image(diamond, this.xCoord, this.yCoord-6);
+
+        textSize(32);
+        fill(255, 0, 0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else {
+          text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        }
+      } else if (this.suit==2) {
+        //spade
+        imageMode(CORNER);
+        if (this.scale<1) {
+          spade.resize(0, 35);
+        } else {
+          spade.resize(0, 60);
+        }
+        image(spade, this.xCoord, this.yCoord-6);
+
+        textSize(32);
+        fill(0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else {
+          text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        }
       } else {
-        text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        //club
+        imageMode(CORNER);
+        if (this.scale<1) {
+          club.resize(0, 35);
+        } else {
+          club.resize(0, 60);
+        }
+        image(club, this.xCoord, this.yCoord-6);
+
+        textSize(32);
+        fill(0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        } else {
+          text(this.stringValue, this.xCoord-10+(this.scale*cardWidth/2), this.yCoord+10+(this.scale*cardHeight/2));
+        }
       }
     }
   }
