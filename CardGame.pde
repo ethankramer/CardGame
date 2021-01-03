@@ -25,7 +25,7 @@ void setup() {
   spade = loadImage("spade.png");
   club = loadImage("club.png");
 
-   
+
   //deck.shuffleDeck();
 }
 
@@ -101,26 +101,26 @@ public class Deck {
   public Node getHead() {
     return this.head;
   }
-  
-  public void checkNext(){
-     Node curr = this.head;
-     int count = 1;
-     int x = 30;
-     int y = 30;
-     while(curr.hasNext()){
-        System.out.println("True #"+count); 
-        Card c = curr.getNext().getData();
-        c.setX(x);
-        c.setY(y);
-        c.drawCard();
-        x+=103;
-        count++;
-        if(x>1300){
-          y += 150;
-          x = 30;
-        }
-        curr=curr.getNext();
-     }
+
+  public void checkNext() {
+    Node curr = this.head;
+    int count = 1;
+    int x = 30;
+    int y = 30;
+    while (curr.hasNext()) {
+      System.out.println("True #"+count); 
+      Card c = curr.getNext().getData();
+      c.setX(x);
+      c.setY(y);
+      c.drawCard();
+      x+=103;
+      count++;
+      if (x>1300) {
+        y += 150;
+        x = 30;
+      }
+      curr=curr.getNext();
+    }
   }
 
   public void shuffleDeck() {
@@ -151,10 +151,15 @@ public class Deck {
 
   public Card drawCard() {
     //Draw a card from the top of the deck (removing it), and return that card
-    Card c = this.head.getNext().getData();
-    this.head.changeNext(this.head.getNext().getNext());
-    len--;
-    return c;
+    if (this.head.hasNext()) {
+      Card c = this.head.getNext().getData();
+      this.head.changeNext(this.head.getNext().getNext());
+      len--;
+      return c;
+    }
+    else{
+       return null; 
+    }
   }
 
   public void displayDeck() {
@@ -256,24 +261,23 @@ public class BlackJack {
 
   public BlackJack() {
     deck = new Deck();
-    //deck.shuffleDeck();
+    deck.shuffleDeck();
 
     playerHand = new BlackJackHand();
     dealerHand = new BlackJackHand();
 
     for (int i=0; i<4; i++) {
-      //Card c = deck.removeCard();
-      //c.drawCard();
-      
-       if(i%2==0){
-       playerHand.addCard(deck.drawCard());
-       } else{
-       dealerHand.addCard(deck.drawCard()); 
-       }
+      if (i%2==0) {
+        playerHand.addCard(deck.drawCard());
+      } else {
+        dealerHand.addCard(deck.drawCard());
+      }
     }
   }
 
-  public Deck getDeck(){return this.deck;}
+  public Deck getDeck() {
+    return this.deck;
+  }
 
   public void displayPlayerHand() {
     this.playerHand.displayHand(30);
