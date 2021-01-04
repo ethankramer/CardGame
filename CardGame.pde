@@ -31,15 +31,9 @@ void setup() {
 
 void draw() {
   background(150, 200, 50);
-  //deck.drawCard();
-  //deck.shuffleDeck();
-  //System.out.println(deck.getHead().getNext().hasNext());
-  //deck.drawCard();
-  //deck.displayDeck();
 
-  game.displayPlayerHand();
-  game.displayDealerHand();
-  game.getDeck().displayDeck();
+  game.drawGame();
+  //game.getDeck().displayDeck();
 }
 
 
@@ -218,15 +212,14 @@ public class BlackJackHand {
     return false;
   }
 
-  public void displayHand(float yVal) {
+  public void displayHand(float xVal, float yVal) {
     Node curr = head;
-    int initialX = 1500;
     while (curr.hasNext()) {
       curr=curr.getNext();
       Card c = curr.getData();
-      c.setX(initialX);
+      c.setX(xVal);
       c.setY(yVal);
-      initialX += cardWidth+3;
+      xVal += cardWidth+3;
       c.drawCard();
     }
   }
@@ -263,12 +256,25 @@ public class BlackJack {
   public Deck getDeck() {
     return this.deck;
   }
-
-  public void displayPlayerHand() {
-    this.playerHand.displayHand(30);
+  public BlackJackHand getPlayerHand() {
+    return this.playerHand;
   }
-  public void displayDealerHand() {
-    this.dealerHand.displayHand(33 + cardHeight);
+  public BlackJackHand getDealerHand() {
+    return this.dealerHand;
+  }
+
+  public void drawGame() {
+    //Display player and dealer hands
+    this.playerHand.displayHand(100,100);
+    this.dealerHand.displayHand(1500,100);
+    
+    fill(#D7CCAF);
+    rect(100,cardHeight+105,cardWidth,cardHeight/2,3);
+    rect(cardWidth+103,cardHeight+105,cardWidth,cardHeight/2,3);
+    fill(#D2092B);
+    textSize(30);
+    text("Hit",127,cardHeight+154);
+    text("Stand",211,cardHeight+154);
   }
 }
 /* ************ END BLACKJACK CLASS ************ */
@@ -287,7 +293,7 @@ public class Card {
     value=(val%13)+1;
     xCoord = x;
     yCoord = y;
-    faceDown = false;
+    faceDown = true;
     if (value==1) {
       stringValue = "A";
     } else if (value==11) {
