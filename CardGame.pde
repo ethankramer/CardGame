@@ -17,7 +17,7 @@ BlackJack game = new BlackJack();
 
 void setup() {
   size(1920, 950);
-  frameRate(10);
+  frameRate(100);
 
   heart = loadImage("heart.png");
   diamond = loadImage("diamond.png");
@@ -35,6 +35,12 @@ void draw() {
   game.drawGame();
   //game.getDeck().displayDeck();
 }
+
+void mouseClicked(){
+  game.hitButtonPressed(mouseX,mouseY);
+}
+
+
 
 
 /* ************ NODE CLASS ************ */
@@ -95,6 +101,10 @@ public class Deck {
 
   public Node getHead() {
     return this.head;
+  }
+  
+  public int getLength(){
+     return this.len; 
   }
 
   public void shuffleDeck() {
@@ -275,6 +285,20 @@ public class BlackJack {
     textSize(30);
     text("Hit",127,cardHeight+154);
     text("Stand",211,cardHeight+154);
+  }
+  
+  public void hitButtonPressed(int x, int y){
+    if((x>=100)&&(x<100+cardWidth)){
+       if((y>=cardHeight+105)&&(y<=105+((3*cardHeight/2)))){
+         if(this.deck.getLength()>1){
+           Card c = this.deck.takeCard();
+           c.setFaceDown(false);
+           playerHand.addCard(c);
+         }else{
+            System.out.println("Deck is empty"); 
+         }
+       }
+    }
   }
 }
 /* ************ END BLACKJACK CLASS ************ */
