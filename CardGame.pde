@@ -3,7 +3,7 @@ import java.lang.Math;
 
 Random rng = new Random();
 
-static final float cardWidth = 75;
+static final float cardWidth = 100;
 static final float cardHeight = 1.5*cardWidth;
 
 PImage heart;
@@ -28,7 +28,7 @@ void setup() {
 void draw() {
   background(150, 200, 50);
 
-  //game.drawGame();
+  game.drawGame();
 }
 
 void mouseClicked() {
