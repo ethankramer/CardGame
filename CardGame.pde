@@ -36,8 +36,9 @@ void draw() {
   //game.getDeck().displayDeck();
 }
 
-void mouseClicked(){
-  game.hitButtonPressed(mouseX,mouseY);
+void mouseClicked() {
+  game.hitButtonPressed(mouseX, mouseY);
+  game.standButtonPressed(mouseX, mouseY);
 }
 
 
@@ -102,9 +103,9 @@ public class Deck {
   public Node getHead() {
     return this.head;
   }
-  
-  public int getLength(){
-     return this.len; 
+
+  public int getLength() {
+    return this.len;
   }
 
   public void shuffleDeck() {
@@ -175,21 +176,29 @@ public class BlackJackHand {
   private Node head;
   private Node tail;
   private int sum;
-  private boolean hasAce;
+  private int aceCount;
 
   public BlackJackHand() {
     head = new Node(null);
     tail = head;
     sum = 0;
-    hasAce = false;
+    aceCount = 0;
   }
 
   public void addCard(Card c) {
     this.tail.addNext(c);
     this.tail=this.tail.getNext();
     if (c.getValue()==1) {
-      this.hasAce = true;
+      this.aceCount++;
     }
+  }
+
+  public Node getHead() {
+    return this.head;
+  }
+
+  public int getSum() {
+    return this.sum;
   }
 
   public void incrementSum(Card c) {
@@ -210,8 +219,9 @@ public class BlackJackHand {
 
   public boolean checkBust() {
     if (sum>21) {
-      if (this.hasAce) {
+      if (this.aceCount>0) {
         sum -= 10;
+        aceCount--;
         if (sum>21) {
           return true;
         }
@@ -223,6 +233,7 @@ public class BlackJackHand {
   }
 
   public void displayHand(float xVal, float yVal) {
+    float temp = xVal;
     Node curr = head;
     while (curr.hasNext()) {
       curr=curr.getNext();
@@ -231,6 +242,11 @@ public class BlackJackHand {
       c.setY(yVal);
       xVal += cardWidth+3;
       c.drawCard();
+    }
+    textSize(32);
+    fill(#D2092B);
+    if (this.sum!=0) {
+      text("Score:"+this.getSum(), temp, 215+cardHeight);
     }
   }
 }
@@ -254,9 +270,11 @@ public class BlackJack {
       if (i%2==0) {
         c.setFaceDown(false);
         playerHand.addCard(c);
+        playerHand.incrementSum(c);
       } else {
         if (i==1) {
           c.setFaceDown(false);
+          dealerHand.incrementSum(c);
         }
         dealerHand.addCard(c);
       }
@@ -275,29 +293,55 @@ public class BlackJack {
 
   public void drawGame() {
     //Display player and dealer hands
-    this.playerHand.displayHand(100,100);
-    this.dealerHand.displayHand(1500,100);
-    
+    this.playerHand.displayHand(100, 100);
+    this.dealerHand.displayHand(1300, 100);
+
     fill(#D7CCAF);
-    rect(100,cardHeight+105,cardWidth,cardHeight/2,3);
-    rect(cardWidth+103,cardHeight+105,cardWidth,cardHeight/2,3);
+    rect(100, cardHeight+105, cardWidth, cardHeight/2, 3);
+    rect(cardWidth+103, cardHeight+105, cardWidth, cardHeight/2, 3);
     fill(#D2092B);
     textSize(30);
-    text("Hit",127,cardHeight+154);
-    text("Stand",211,cardHeight+154);
+    text("Hit", 127, cardHeight+154);
+    text("Stand", 211, cardHeight+154);
   }
-  
-  public void hitButtonPressed(int x, int y){
-    if((x>=100)&&(x<100+cardWidth)){
-       if((y>=cardHeight+105)&&(y<=105+((3*cardHeight/2)))){
-         if(this.deck.getLength()>1){
-           Card c = this.deck.takeCard();
-           c.setFaceDown(false);
-           playerHand.addCard(c);
-         }else{
-            System.out.println("Deck is empty"); 
-         }
-       }
+
+  public void hitButtonPressed(int x, int y) {
+    if ((x>=100)&&(x<100+cardWidth)) {
+      if ((y>=cardHeight+105)&&(y<=105+((3*cardHeight/2)))) {
+        if (this.deck.getLength()>1) {
+          Card c = this.deck.takeCard();
+          c.setFaceDown(false);
+          playerHand.addCard(c);
+          playerHand.incrementSum(c);
+          if (playerHand.checkBust()) {
+            System.out.println("Bust!");
+          }
+        } else {
+          System.out.println("Deck is empty");
+        }
+      }
+    }
+  }
+
+  public void standButtonPressed(int x, int y) {
+    if ((x>=cardWidth+103)&&(x<(2*cardWidth)+103)) {
+      if ((y>=cardHeight+105)&&(y<=105+((3*cardHeight/2)))) {
+        System.out.println("test");
+        Node curr = this.dealerHand.getHead().getNext();
+        while (curr.hasNext()) {
+          curr = curr.getNext();
+          curr.getData().setFaceDown(false);
+          this.dealerHand.incrementSum(curr.getData());
+        }
+        while (dealerHand.getSum()<17) {
+          Card c = this.deck.takeCard();
+          c.setFaceDown(false);
+          dealerHand.addCard(c);
+          dealerHand.incrementSum(c);
+          dealerHand.checkBust();
+          //System.out.println(dealerHand.getSum());
+        }
+      }
     }
   }
 }
