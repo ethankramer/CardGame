@@ -3,7 +3,7 @@ import java.lang.Math;
 
 Random rng = new Random();
 
-static final float cardWidth = 100;
+static final float cardWidth = 75;
 static final float cardHeight = 1.5*cardWidth;
 
 PImage heart;
@@ -12,7 +12,6 @@ PImage spade;
 PImage club;
 PImage cardBack;
 
-Deck deck = new Deck();
 BlackJack game = new BlackJack();
 
 void setup() {
@@ -24,16 +23,12 @@ void setup() {
   spade = loadImage("spade.png");
   club = loadImage("club.png");
   cardBack = loadImage("cardBack.png");
-
-
-  //deck.shuffleDeck();
 }
 
 void draw() {
   background(150, 200, 50);
 
-  game.drawGame();
-  //game.getDeck().displayDeck();
+  //game.drawGame();
 }
 
 void mouseClicked() {
@@ -96,6 +91,23 @@ public class Deck {
         curr.addNext(c);
         curr = curr.getNext();
         len++;
+      }
+    }
+  }
+
+  public Deck(int multipleDecks) {
+    head = new Node(null);
+    curr = head;
+    len = 0;
+    for (int i=0; i<multipleDecks; i++) {
+      for (int suit=0; suit<4; suit++) {
+        for (int value=0; value<13; value++) {
+          Card c = new Card(suit, value, 0, 0);
+          c.setFaceDown(false);
+          curr.addNext(c);
+          curr = curr.getNext();
+          len++;
+        }
       }
     }
   }
@@ -245,9 +257,8 @@ public class BlackJackHand {
     }
     textSize(32);
     fill(#D2092B);
-    if (this.sum!=0) {
-      text("Score:"+this.getSum(), temp, 215+cardHeight);
-    }
+
+    text("Score:"+this.getSum(), temp, 215+cardHeight);
   }
 }
 /* ************ END BLACKJACKHAND CLASS ************ */
@@ -326,7 +337,6 @@ public class BlackJack {
   public void standButtonPressed(int x, int y) {
     if ((x>=cardWidth+103)&&(x<(2*cardWidth)+103)) {
       if ((y>=cardHeight+105)&&(y<=105+((3*cardHeight/2)))) {
-        System.out.println("test");
         Node curr = this.dealerHand.getHead().getNext();
         while (curr.hasNext()) {
           curr = curr.getNext();
@@ -339,7 +349,6 @@ public class BlackJack {
           dealerHand.addCard(c);
           dealerHand.incrementSum(c);
           dealerHand.checkBust();
-          //System.out.println(dealerHand.getSum());
         }
       }
     }
