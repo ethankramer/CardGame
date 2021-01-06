@@ -309,12 +309,12 @@ public class BlackJackHand {
       textSize(30*(cardWidth/100));
       text("Hit", this.xCoord+(29*cardWidth/100), this.yCoord+cardHeight+(53*cardWidth/100));
       text("Stand", this.xCoord+cardWidth+(13*cardWidth/100), this.yCoord+cardHeight+(53*cardWidth/100));
-      text("Score:"+this.getSum(), this.xCoord, this.yCoord+cardHeight+40+(cardHeight/2));
+      text("Score:"+this.getSum(), this.xCoord, this.yCoord+cardHeight+(40*cardWidth/100)+(cardHeight/2));
     } else {
       //Dealer hand
       fill(#D2092B);
       textSize(30*(cardWidth/100));
-      text("Score:"+this.getSum(), this.xCoord, this.yCoord+cardHeight+40);
+      text("Score:"+this.getSum(), this.xCoord, this.yCoord+cardHeight+(40*cardWidth/100));
     }
   }
 }
@@ -339,7 +339,7 @@ public class BlackJack {
     int tempY = 50;
     for (int i=0; i<numPlayers; i++) {
       playerHands[i] = new BlackJackHand(100, tempY, false);
-      tempY += ((3/2)*cardHeight)+150;
+      tempY += ((3/2)*cardHeight)+(150*(cardWidth/100));
     }
 
     playerHands[numPlayers] = new BlackJackHand(1300, 50, true);
@@ -482,11 +482,16 @@ public class Card {
       if (this.suit==0) {
         //heart
         imageMode(CORNER);
-        heart.resize(0, 60);
+        if((cardWidth/100)>=1){
+          heart.resize(0, 60);
+        }else{
+           heart.resize(0,30); 
+        }
+        
 
         image(heart, this.xCoord, this.yCoord-6);
 
-        textSize(32);
+        textSize(32*cardWidth/100);
         fill(255, 0, 0);
         if (this.value==10) {
           text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
@@ -499,11 +504,15 @@ public class Card {
         //diamond
         imageMode(CORNER);
 
-        diamond.resize(0, 60);
+        if((cardWidth/100)>=1){
+          diamond.resize(0, 60);
+        }else{
+           diamond.resize(0,30); 
+        }
 
         image(diamond, this.xCoord, this.yCoord-6);
 
-        textSize(32);
+        textSize(32*cardWidth/100);
         fill(255, 0, 0);
         if (this.value==10) {
           text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+cardHeight/2);
@@ -516,11 +525,15 @@ public class Card {
         //spade
         imageMode(CORNER);
 
-        spade.resize(0, 60);
+        if((cardWidth/100)>=1){
+          spade.resize(0, 60);
+        }else{
+           spade.resize(0,30); 
+        }
 
         image(spade, this.xCoord, this.yCoord-6);
 
-        textSize(32);
+        textSize(32*cardWidth/100);
         fill(0);
         if (this.value==10) {
           text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
@@ -533,11 +546,15 @@ public class Card {
         //club
         imageMode(CORNER);
 
-        club.resize(0, 60);
+        if((cardWidth/100)>=1){
+          club.resize(0, 60);
+        }else{
+           club.resize(0,30); 
+        }
 
         image(club, this.xCoord, this.yCoord-6);
 
-        textSize(32);
+        textSize(32*cardWidth/100);
         fill(0);
         if (this.value==10) {
           text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
