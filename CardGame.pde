@@ -32,8 +32,8 @@ void draw() {
 }
 
 void mouseClicked() {
-  //game.hitButtonPressed(mouseX, mouseY);
-  //game.standButtonPressed(mouseX, mouseY);
+  game.gameHitButtonPressed(mouseX, mouseY);
+  game.nextPlayer(mouseX, mouseY);
 }
 
 
@@ -192,6 +192,7 @@ public class BlackJackHand {
   private float xCoord; //Coordinates to be able to replicate multiple hands
   private float yCoord; //Multiple hands == multiple players
   private boolean dealer; //Special case for one hand which is designated as the dealer
+  private boolean bust; //if sum>21 then player busted (bust=true)
 
   public BlackJackHand(float x, float y, boolean deal) {
     head = new Node(null);
@@ -201,6 +202,7 @@ public class BlackJackHand {
     xCoord = x;
     yCoord = y;
     dealer = deal;
+    bust=false;
   }
 
   public void addCard(Card c) {
@@ -235,19 +237,52 @@ public class BlackJackHand {
     }
   }
 
-  public boolean checkBust() {
+  public void checkBust() {
     if (sum>21) {
       if (this.aceCount>0) {
         sum -= 10;
         aceCount--;
         if (sum>21) {
-          return true;
+          this.bust = true;
         }
       } else {
-        return true;
+        this.bust = true;
+      }
+    } else {
+      this.bust = false;
+    }
+  }
+
+  public Deck hitButtonPressed(Deck deck, int x, int y) {
+    if (!this.bust) {
+      if ((x>=this.xCoord)&&(x<this.xCoord+cardWidth)) {
+        if ((y>=cardHeight+this.yCoord+5)&&(y<=this.yCoord+5+((3*cardHeight/2)))) {
+          if (deck.getLength()>1) {
+            Card c = deck.takeCard();
+            c.setFaceDown(false);
+            this.addCard(c);
+            this.incrementSum(c);
+            this.checkBust();
+
+            if (this.bust) {
+              System.out.println("Bust!");
+            }
+          } else {
+            System.out.println("Deck is empty");
+          }
+        }
       }
     }
-    return false;
+    return deck;
+  }
+
+  public int standButtonPressed(int playerTurn, int x, int y) {
+    if ((x>=this.xCoord+cardWidth+3)&&(x<this.xCoord+(2*cardWidth)+3)) {
+      if ((y>=cardHeight+this.yCoord+5)&&(y<=this.yCoord+5+((3*cardHeight/2)))) {
+        playerTurn++;
+      }
+    }
+    return playerTurn;
   }
 
   public void displayHand() {
@@ -289,6 +324,7 @@ public class BlackJackHand {
 public class BlackJack {
   private Deck deck;
   private int numPlayers; //Number of players **NOT** counting the dealer
+  private int playerTurn;
   private BlackJackHand[] playerHands;
 
   public BlackJack(int players) {
@@ -296,6 +332,7 @@ public class BlackJack {
     deck.shuffleDeck();
 
     numPlayers = players;
+    playerTurn = 0;
 
     playerHands = new BlackJackHand[numPlayers+1];
 
@@ -322,7 +359,6 @@ public class BlackJack {
     }
     this.playerHands[numPlayers].getHead().getNext().getData().setFaceDown(false);
     this.playerHands[numPlayers].incrementSum(this.playerHands[numPlayers].getHead().getNext().getData());
-    
   }
 
   public Deck getDeck() {
@@ -341,191 +377,177 @@ public class BlackJack {
       player.displayHand();
     }
   }
-/*
-  public void hitButtonPressed(int x, int y) {
-    if ((x>=100)&&(x<100+cardWidth)) {
-      if ((y>=cardHeight+105)&&(y<=105+((3*cardHeight/2)))) {
-        if (this.deck.getLength()>1) {
-          Card c = this.deck.takeCard();
-          c.setFaceDown(false);
-          playerHand.addCard(c);
-          playerHand.incrementSum(c);
-          if (playerHand.checkBust()) {
-            System.out.println("Bust!");
-          }
-        } else {
-          System.out.println("Deck is empty");
-        }
-      }
-    }
+
+  public void gameHitButtonPressed(int x, int y) {
+    this.deck = playerHands[playerTurn%numPlayers].hitButtonPressed(this.deck, x, y);
   }
 
-
-  public void standButtonPressed(int x, int y) {
-    if ((x>=cardWidth+103)&&(x<(2*cardWidth)+103)) {
-      if ((y>=cardHeight+105)&&(y<=105+((3*cardHeight/2)))) {
-        Node curr = this.dealerHand.getHead().getNext();
-        while (curr.hasNext()) {
-          curr = curr.getNext();
-          curr.getData().setFaceDown(false);
-          this.dealerHand.incrementSum(curr.getData());
-        }
-        while (dealerHand.getSum()<17) {
-          Card c = this.deck.takeCard();
-          c.setFaceDown(false);
-          dealerHand.addCard(c);
-          dealerHand.incrementSum(c);
-          dealerHand.checkBust();
-        }
+  public void nextPlayer(int x, int y) {
+    this.playerTurn = this.playerHands[playerTurn].standButtonPressed(playerTurn, x, y);
+    if (playerTurn==numPlayers) {
+      BlackJackHand dealer = playerHands[numPlayers];
+      Node curr = dealer.getHead().getNext();
+      while (curr.hasNext()) {
+        curr = curr.getNext();
+        curr.getData().setFaceDown(false);
+        dealer.incrementSum(curr.getData());
+        dealer.checkBust();
       }
+      while (playerHands[numPlayers].getSum()<17) {
+        Card c = this.deck.takeCard();
+        c.setFaceDown(false);
+        dealer.addCard(c);
+        dealer.incrementSum(c);
+        dealer.checkBust();
+      }
+      playerTurn = 0;
     }
   }
-  */
 }
 
-  /* ************ END BLACKJACK CLASS ************ */
+/* ************ END BLACKJACK CLASS ************ */
 
-  /* ************ CARD CLASS ************ */
-  public class Card {
-    private int suit; //0=heart, 1=diamond, 2=spade, 3=club
-    private int value; //1=Ace, 2-10 = 1-10, 11=J, 12=Q, 13=K
-    private float xCoord; //x Coordinate (top left corner)
-    private float yCoord; //y Coordinate (top left corner)
-    private String stringValue; //String representation of the value
-    private boolean faceDown;
+/* ************ CARD CLASS ************ */
+public class Card {
+  private int suit; //0=heart, 1=diamond, 2=spade, 3=club
+  private int value; //1=Ace, 2-10 = 1-10, 11=J, 12=Q, 13=K
+  private float xCoord; //x Coordinate (top left corner)
+  private float yCoord; //y Coordinate (top left corner)
+  private String stringValue; //String representation of the value
+  private boolean faceDown;
 
-    public Card(int st, int val, float x, float y) {
-      suit=st%4;
-      value=(val%13)+1;
-      xCoord = x;
-      yCoord = y;
-      faceDown = true;
-      if (value==1) {
-        stringValue = "A";
-      } else if (value==11) {
-        stringValue = "J";
-      } else if (value==12) {
-        stringValue = "Q";
-      } else if (value==13) {
-        stringValue = "K";
-      } else {
-        stringValue = ""+value;
-      }
+  public Card(int st, int val, float x, float y) {
+    suit=st%4;
+    value=(val%13)+1;
+    xCoord = x;
+    yCoord = y;
+    faceDown = true;
+    if (value==1) {
+      stringValue = "A";
+    } else if (value==11) {
+      stringValue = "J";
+    } else if (value==12) {
+      stringValue = "Q";
+    } else if (value==13) {
+      stringValue = "K";
+    } else {
+      stringValue = ""+value;
     }
+  }
 
-    //Get methods
-    public int getSuit() {
-      return suit;
-    }
-    public int getValue() {
-      return value;
-    }
-    public float getX() {
-      return xCoord;
-    }
-    public float getY() {
-      return yCoord;
-    }
+  //Get methods
+  public int getSuit() {
+    return suit;
+  }
+  public int getValue() {
+    return value;
+  }
+  public float getX() {
+    return xCoord;
+  }
+  public float getY() {
+    return yCoord;
+  }
 
-    public boolean getFaceDown() {
-      return faceDown;
-    }
+  public boolean getFaceDown() {
+    return faceDown;
+  }
 
-    //Set methods
-    public void setSuit(int st) {
-      suit = st;
-    }
-    public void setValue(int val) {
-      value = val;
-    }
-    public void setX(float x) {
-      xCoord = x;
-    }
-    public void setY(float y) {
-      yCoord = y;
-    }
-    public void setFaceDown(boolean b) {
-      faceDown=b;
-    }
+  //Set methods
+  public void setSuit(int st) {
+    suit = st;
+  }
+  public void setValue(int val) {
+    value = val;
+  }
+  public void setX(float x) {
+    xCoord = x;
+  }
+  public void setY(float y) {
+    yCoord = y;
+  }
+  public void setFaceDown(boolean b) {
+    faceDown=b;
+  }
 
-    public void drawCard() {
-      fill(230);
-      stroke(0);
-      rect(xCoord, yCoord, cardWidth, cardHeight, 6);
-      if (faceDown) {
-        imageMode(CENTER);
-        cardBack.resize((int)cardWidth*2, 0);
-        image(cardBack, this.xCoord+(cardWidth/2), this.yCoord+(cardHeight/2));
-      } else {
-        if (this.suit==0) {
-          //heart
-          imageMode(CORNER);
-          heart.resize(0, 60);
+  public void drawCard() {
+    fill(230);
+    stroke(0);
+    rect(xCoord, yCoord, cardWidth, cardHeight, 6);
+    if (faceDown) {
+      imageMode(CENTER);
+      cardBack.resize((int)cardWidth*2, 0);
+      image(cardBack, this.xCoord+(cardWidth/2), this.yCoord+(cardHeight/2));
+    } else {
+      if (this.suit==0) {
+        //heart
+        imageMode(CORNER);
+        heart.resize(0, 60);
 
-          image(heart, this.xCoord, this.yCoord-6);
+        image(heart, this.xCoord, this.yCoord-6);
 
-          textSize(32);
-          fill(255, 0, 0);
-          if (this.value==10) {
-            text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          } else if (this.value==11) {
-            text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          } else {
-            text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          }
-        } else if (this.suit==1) {
-          //diamond
-          imageMode(CORNER);
-
-          diamond.resize(0, 60);
-
-          image(diamond, this.xCoord, this.yCoord-6);
-
-          textSize(32);
-          fill(255, 0, 0);
-          if (this.value==10) {
-            text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+cardHeight/2);
-          } else if (this.value==11) {
-            text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          } else {
-            text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          }
-        } else if (this.suit==2) {
-          //spade
-          imageMode(CORNER);
-
-          spade.resize(0, 60);
-
-          image(spade, this.xCoord, this.yCoord-6);
-
-          textSize(32);
-          fill(0);
-          if (this.value==10) {
-            text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          } else if (this.value==11) {
-            text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          } else {
-            text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          }
+        textSize(32);
+        fill(255, 0, 0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
         } else {
-          //club
-          imageMode(CORNER);
+          text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        }
+      } else if (this.suit==1) {
+        //diamond
+        imageMode(CORNER);
 
-          club.resize(0, 60);
+        diamond.resize(0, 60);
 
-          image(club, this.xCoord, this.yCoord-6);
+        image(diamond, this.xCoord, this.yCoord-6);
 
-          textSize(32);
-          fill(0);
-          if (this.value==10) {
-            text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          } else if (this.value==11) {
-            text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          } else {
-            text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
-          }
+        textSize(32);
+        fill(255, 0, 0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+cardHeight/2);
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        } else {
+          text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        }
+      } else if (this.suit==2) {
+        //spade
+        imageMode(CORNER);
+
+        spade.resize(0, 60);
+
+        image(spade, this.xCoord, this.yCoord-6);
+
+        textSize(32);
+        fill(0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        } else {
+          text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        }
+      } else {
+        //club
+        imageMode(CORNER);
+
+        club.resize(0, 60);
+
+        image(club, this.xCoord, this.yCoord-6);
+
+        textSize(32);
+        fill(0);
+        if (this.value==10) {
+          text(this.stringValue, this.xCoord-17+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        } else if (this.value==11) {
+          text(this.stringValue, this.xCoord-3+(cardWidth/2), this.yCoord+10+(cardHeight/2));
+        } else {
+          text(this.stringValue, this.xCoord-10+(cardWidth/2), this.yCoord+10+(cardHeight/2));
         }
       }
     }
   }
-  /* ************ END CARD CLASS ************ */
+}
+/* ************ END CARD CLASS ************ */
