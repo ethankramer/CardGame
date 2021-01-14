@@ -3,21 +3,26 @@ import java.lang.Math;
 
 Random rng = new Random();
 
+// Set width of the cards
+// Card height is fixed proportionally to width
 static final float cardWidth = 100;
 static final float cardHeight = 1.5*cardWidth;
 
+// Prepare to load the images for all 4 suits and card backs
 PImage heart;
 PImage diamond;
 PImage spade;
 PImage club;
 PImage cardBack;
 
+// Create a new game of BlackJack
 BlackJack game = new BlackJack(3);
 
 void setup() {
   size(1920, 950);
   frameRate(100);
 
+  // Load the images for all 4 suits and card backs
   heart = loadImage("heart.png");
   diamond = loadImage("diamond.png");
   spade = loadImage("spade.png");
@@ -26,13 +31,17 @@ void setup() {
 }
 
 void draw() {
+  // Set the background color
   background(150, 200, 50);
 
+  // Run the current game
   game.drawGame();
 }
 
 void mouseClicked() {
+  // Check if the hit button was pressed for the current player
   game.gameHitButtonPressed(mouseX, mouseY);
+  // Check if the stand button was pressed for the current player 
   game.nextPlayer(mouseX, mouseY);
 }
 
@@ -40,78 +49,88 @@ void mouseClicked() {
 
 
 /* ************ NODE CLASS ************ */
+// Class for Nodes that will make up a linked list (Deck of cards)
 public class Node {
-  private Card data;
-  private Node next;
+  private Card data; // The data value fo the node will be a card
+  private Node next; // Next node in the linked list (null if current node is the last node)
 
   public Node(Card d) {
+    // Constructor for the Node class
     data = d;
     next = null;
   }
-
+  
+  // Get methods
   public Card getData() {
     return this.data;
   }
   public Node getNext() {
     return this.next;
   }
+  
+  // When traversing the linked list, check to see if there are any cards left
+  public boolean hasNext() {
+    return next!=null;
+  }
 
+  // addNext() used to add a Node to the end of the list (extend the linked list)
   public void addNext(Card n) {
     this.next = new Node(n);
   }
 
+  // changeNext() primarily used to remove a card from the deck/linked list
   public void changeNext(Node n) {
     this.next = n;
   }
 
+  // Remove any references to cards in the deck or other nodes in the linked list
   public void removeFromList() {
     this.data=null;
     this.next=null;
-  }
-
-  public boolean hasNext() {
-    return next!=null;
   }
 }
 /* ************ END NODE CLASS ************ */
 
 /* ************ DECK CLASS ************ */
-public class Deck {
-  private Node head; //Linked List of Cards
-  private Node curr;
-  private int len;
+public class Deck { //Linked List of Cards
+  private Node head; // Head node used as a reference (no data value)
+  private Node curr; // Indexing Node used to traverse through the linked list
+  private int len; // Length of the linked list (not counting the head node)
 
-  public Deck() {
+  public Deck() { // Constructor for the deck of cards
     head = new Node(null);
     curr = head;
     len = 0;
-    for (int suit=0; suit<4; suit++) {
-      for (int value=0; value<13; value++) {
+    // Create new cards and add them to the deck
+    for (int suit=0; suit<4; suit++) { // 4 suits
+      for (int value=0; value<13; value++) { // 13 values per suit
         Card c = new Card(suit, value, 0, 0);
-        curr.addNext(c);
-        curr = curr.getNext();
-        len++;
+        curr.addNext(c); // Add a new node with the newly created card
+        curr = curr.getNext(); // Indexing node set to the newly created node
+        len++; // Since a card(node) was added, increment the length by 1
       }
     }
   }
 
-  public Deck(int multipleDecks) {
+  public Deck(int multipleDecks) { // Similiar constructor as above, but with a custom number of decks (not just 1 single deck)
     head = new Node(null);
     curr = head;
     len = 0;
-    for (int i=0; i<multipleDecks; i++) {
-      for (int suit=0; suit<4; suit++) {
-        for (int value=0; value<13; value++) {
+    if(multipleDecks<1){multipleDecks=1;} //Number of decks cannot be negative or zero (need at least 1 deck)
+    
+    for (int i=0; i<multipleDecks; i++) { // Create a custom amount of decks combined as one big deck of cards
+      for (int suit=0; suit<4; suit++) { // 4 suits
+        for (int value=0; value<13; value++) { // 13 values per suit
           Card c = new Card(suit, value, 0, 0);
-          c.setFaceDown(false);
-          curr.addNext(c);
-          curr = curr.getNext();
-          len++;
+          curr.addNext(c); // Add a new node with the newly created card
+          curr = curr.getNext(); // Indexing node set to the newly created node
+          len++; // Since a card(Node) was added, increment the length by 1
         }
       }
     }
   }
 
+  // Get methods
   public Node getHead() {
     return this.head;
   }
@@ -120,29 +139,31 @@ public class Deck {
     return this.len;
   }
 
+  // Custom made shuffle method to shuffle the deck of cards
   public void shuffleDeck() {
-    Card[] tempList = new Card[len];
-    int tempIndex = 0;
-    for (int i=len; i>0; i--) {
-      int rand = rng.nextInt(i)+1;
-      if (head.hasNext()) {
-        Node before = head;
+    Card[] tempList = new Card[len]; // Create a temporary array of cards to hold cards as they are removed from the deck
+    int tempIndex = 0; // Index for the temporary array created above
+    for (int i=len; i>0; i--) { // Iterate through the deck, picking random numbers from 1 to len inclusive
+      int rand = rng.nextInt(i)+1; // Get a random index
+      if (head.hasNext()) { // Precautionary check to make sure there are still cards in the deck (this should always be true)
+        // Keep track of 2 nodes, the node we want to remove, and the node that comes before it
+        Node before = head; 
         Node temp = head.getNext();
-        for (int count=1; count<rand; count++) {
+        for (int count=1; count<rand; count++) { // For loop to traverse the linked list until we have reached the randomly selected index
           before = temp;
           temp = temp.getNext();
         }
-        tempList[tempIndex] = temp.getData();
-        before.next = temp.getNext();
-        temp.removeFromList();
-        tempIndex++;
+        tempList[tempIndex] = temp.getData(); // Now that there is a reference to our randomly selected card, add the card to the temp array at the temp index
+        tempIndex++; // Increment the index of the temp array
+        before.next = temp.getNext(); // Change the next node of the previous node to the next node (effectively skipping the node we want to remove)
+        temp.removeFromList(); // The linked list is still intact, go ahead and remove the randomly chosen node from the linked list
       }
     }
-    //Re initialize the deck with the "shuffled" tempList of Cards
-    Node current = head;
-    for (int i=0; i<tempList.length; i++) {
-      current.addNext(tempList[i]);
-      current = current.getNext();
+    // Re initialize the deck with the "shuffled" tempList of Cards
+    Node current = head; // Use a index node, initialize it at the head node of the linked list
+    for (int i=0; i<tempList.length; i++) { // Iterate through the temp array
+      current.addNext(tempList[i]); // Add the current element to the end of the linked list/deck
+      current = current.getNext(); // Update index node to the newly created node
     }
   }
 
